@@ -17,9 +17,9 @@ const supabase = createClient(
   }
 );
 
-console.log('🌐 DataService initialized with single Supabase client');
+console.log('DataService initialized with single Supabase client');
 console.log('   Direct Data API: https://${projectId}.supabase.co');
-console.log('🔑 Project ID:', projectId);
+console.log('Project ID:', projectId);
 
 export interface Business {
   id: string;
@@ -95,7 +95,7 @@ export const dataService = {
   
   async getBusinesses(): Promise<Business[]> {
     try {
-      console.log('🔍 Fetching businesses directly from Supabase Data API...');
+      console.log('Fetching businesses directly from Supabase Data API...');
       
       // Fetch businesses using the single client
       const { data: businesses, error: businessError } = await supabase
@@ -104,7 +104,7 @@ export const dataService = {
         .order('name');
 
       if (businessError) {
-        console.error('❌ Supabase error:', businessError);
+        console.error('Supabase error:', businessError);
         throw new Error(`Failed to fetch businesses: ${businessError.message}`);
       }
 
@@ -114,7 +114,7 @@ export const dataService = {
         .select('business_id, rating');
 
       if (reviewsError) {
-        console.error('⚠️ Warning: Failed to fetch reviews for rating calculation:', reviewsError);
+        console.error('Warning: Failed to fetch reviews for rating calculation:', reviewsError);
         return businesses as Business[];
       }
 
@@ -124,10 +124,10 @@ export const dataService = {
         .select('*');
 
       if (dealsError) {
-        console.error('⚠️ Warning: Failed to fetch deals:', dealsError);
+        console.error('Warning: Failed to fetch deals:', dealsError);
       }
 
-      console.log(`🏷️  Fetched ${deals?.length || 0} total deals from database`);
+      console.log(`Fetched ${deals?.length || 0} total deals from database`);
 
       // Calculate rating and review count for each business
       const reviewsByBusiness = new Map<string, number[]>();
@@ -140,13 +140,13 @@ export const dataService = {
       // Create a set of business IDs that have active, non-expired deals
       const businessesWithActiveDeals = new Set<string>();
       const now = new Date();
-      console.log(`🔍 Processing ${deals?.length || 0} deals to find active ones...`);
+      console.log(`Processing ${deals?.length || 0} deals to find active ones...`);
       deals?.forEach(deal => {
         // Use the correct field name from the database: expirationdate
         const dateValue = deal.expirationdate || deal.expiration_date;
         const expiryDate = dateValue ? new Date(dateValue) : null;
         
-        console.log(`📅 Deal "${deal.title}" for business ${deal.business_id}:`);
+        console.log(`Deal "${deal.title}" for business ${deal.business_id}:`);
         console.log(`   - Expiry date (raw): ${dateValue}`);
         console.log(`   - Parsed date: ${expiryDate}`);
         console.log(`   - Is future date: ${expiryDate && expiryDate > now}`);
@@ -155,9 +155,9 @@ export const dataService = {
         // Only count as active if the deal hasn't expired
         if (expiryDate && expiryDate > now) {
           businessesWithActiveDeals.add(deal.business_id);
-          console.log(`   ✅ Added to active deals set`);
+          console.log(`   Added to active deals set`);
         } else {
-          console.log(`   ❌ Deal expired or invalid date`);
+          console.log(`   Deal expired or invalid date`);
         }
       });
 
@@ -177,8 +177,8 @@ export const dataService = {
         };
       }) || [];
 
-      console.log(`📊 Loaded ${enrichedBusinesses.length} businesses with live ratings`);
-      console.log(`🏷️  ${businessesWithActiveDeals.size} businesses have active deals`);
+      console.log(`Bars Loaded ${enrichedBusinesses.length} businesses with live ratings`);
+      console.log(`${businessesWithActiveDeals.size} businesses have active deals`);
       return enrichedBusinesses as Business[];
     } catch (error) {
       console.error('Error fetching businesses:', error);
@@ -188,7 +188,7 @@ export const dataService = {
 
   async getBusiness(id: string): Promise<Business | null> {
     try {
-      console.log('🔍 Fetching business', id);
+      console.log('Fetching business', id);
       
       const { data: business, error } = await supabase
         .from('businesses')
@@ -198,7 +198,7 @@ export const dataService = {
 
       if (error) {
         if (error.code === 'PGRST116') return null;
-        console.error('❌ Supabase error:', error);
+        console.error('Supabase error:', error);
         throw new Error(`Failed to fetch business: ${error.message}`);
       }
 
@@ -231,7 +231,7 @@ export const dataService = {
 
   async getReviews(businessId?: string, userId?: string): Promise<Review[]> {
     try {
-      console.log('🔍 Fetching reviews...');
+      console.log('Fetching reviews...');
       
       let query = supabase
         .from('reviews')
@@ -254,7 +254,7 @@ export const dataService = {
       const { data, error } = await query;
 
       if (error) {
-        console.error('❌ Supabase error:', error);
+        console.error('Supabase error:', error);
         throw new Error(`Failed to fetch reviews: ${error.message}`);
       }
 
@@ -265,7 +265,7 @@ export const dataService = {
         user_avatar: review.profiles?.avatar_url
       }));
 
-      console.log(`📊 Loaded ${reviews.length} reviews`);
+      console.log(`Loaded ${reviews.length} reviews`);
       return reviews as Review[];
     } catch (error) {
       console.error('Error fetching reviews:', error);
@@ -287,7 +287,7 @@ export const dataService = {
         throw new Error('User not found');
       }
       
-      console.log('🔄 Adding review...', { businessId, rating });
+      console.log('Adding review...', { businessId, rating });
       
       // Use direct fetch with auth token to avoid creating new client
       const data = await authenticatedFetch('reviews?select=*,profiles!reviews_user_id_fkey(name,avatar_url)', {
@@ -302,7 +302,7 @@ export const dataService = {
         })
       });
 
-      console.log('✅ Review added successfully');
+      console.log('Review added successfully');
       
       const reviewData = Array.isArray(data) ? data[0] : data;
       const review: Review = {
@@ -313,7 +313,7 @@ export const dataService = {
       
       return review;
     } catch (error) {
-      console.error('❌ Error adding review:', error);
+      console.error('Error adding review:', error);
       throw error;
     }
   },
@@ -328,17 +328,17 @@ export const dataService = {
       const user = authService.getCurrentUser();
       
       if (!isAuth || !user) {
-        console.log('⚠️ Not authenticated - returning empty bookmarks');
+        console.log('Warning: Not authenticated - returning empty bookmarks');
         return [];
       }
 
-      console.log('🔍 Fetching bookmarks...');
+      console.log('Fetching bookmarks...');
       
       // Use direct fetch with auth token
       const data = await authenticatedFetch(`bookmarks?user_id=eq.${user.id}&select=business_id`);
       
       const bookmarks = (data || []).map((b: any) => b.business_id);
-      console.log(`✅ Fetched ${bookmarks.length} bookmarks`);
+      console.log(`Fetched ${bookmarks.length} bookmarks`);
       return bookmarks;
     } catch (error) {
       console.error('Error fetching bookmarks:', error);
@@ -354,11 +354,11 @@ export const dataService = {
       const user = authService.getCurrentUser();
       
       if (!isAuth || !user) {
-        console.error('❌ Cannot save bookmarks - not authenticated');
+        console.error('Cannot save bookmarks - not authenticated');
         throw new Error('You must be logged in to save bookmarks');
       }
 
-      console.log(`🔄 Saving ${bookmarks.length} bookmarks...`);
+      console.log(`Saving ${bookmarks.length} bookmarks...`);
       
       // Delete all existing bookmarks for this user
       await authenticatedFetch(`bookmarks?user_id=eq.${user.id}`, {
@@ -379,7 +379,7 @@ export const dataService = {
         });
       }
 
-      console.log('✅ Bookmarks saved successfully');
+      console.log('Bookmarks saved successfully');
     } catch (error) {
       console.error('Error saving bookmarks:', error);
       throw error;
@@ -393,11 +393,11 @@ export const dataService = {
       const user = authService.getCurrentUser();
       
       if (!authService.isAuthenticated() || !user) {
-        console.warn('⚠️ Cannot toggle bookmark - not authenticated');
+        console.warn('Warning: Cannot toggle bookmark - not authenticated');
         throw new Error('You must be logged in to bookmark businesses');
       }
 
-      console.log(`🔄 Toggling bookmark for business: ${businessId}`);
+      console.log(`Toggling bookmark for business: ${businessId}`);
       
       // Check if bookmark exists
       const existingBookmarks = await authenticatedFetch(
@@ -411,7 +411,7 @@ export const dataService = {
           { method: 'DELETE' }
         );
 
-        console.log(`✅ Bookmark removed`);
+        console.log(`Bookmark removed`);
         return false;
       } else {
         // Bookmark doesn't exist, create it
@@ -424,7 +424,7 @@ export const dataService = {
           })
         });
 
-        console.log(`✅ Bookmark added`);
+        console.log(`Bookmark added`);
         return true;
       }
     } catch (error) {
@@ -437,7 +437,7 @@ export const dataService = {
 
   async getDeals(businessId?: string): Promise<Deal[]> {
     try {
-      console.log('🔍 Fetching deals...');
+      console.log('Fetching deals...');
       
       let query = supabase
         .from('deals')
@@ -450,7 +450,7 @@ export const dataService = {
       const { data, error } = await query;
 
       if (error) {
-        console.error('❌ Supabase error:', error);
+        console.error('Supabase error:', error);
         throw new Error(`Failed to fetch deals: ${error.message}`);
       }
 
@@ -465,7 +465,7 @@ export const dataService = {
         return expiryDate > now;
       });
 
-      console.log(`📊 Loaded ${activeDeals.length} active deals (${data?.length || 0} total)`);
+      console.log(`Loaded ${activeDeals.length} active deals (${data?.length || 0} total)`);
       return activeDeals as Deal[];
     } catch (error) {
       console.error('Error fetching deals:', error);
@@ -481,7 +481,7 @@ export const dataService = {
         throw new Error('You must be logged in to add a deal');
       }
 
-      console.log('🔄 Adding deal...');
+      console.log('Adding deal...');
 
       const data = await authenticatedFetch('deals', {
         method: 'POST',
@@ -492,10 +492,10 @@ export const dataService = {
         })
       });
 
-      console.log('✅ Deal added successfully');
+      console.log('Deal added successfully');
       return Array.isArray(data) ? data[0] : data;
     } catch (error) {
-      console.error('❌ Error adding deal:', error);
+      console.error('Error adding deal:', error);
       throw error;
     }
   },
@@ -508,16 +508,16 @@ export const dataService = {
         throw new Error('You must be logged in to update a deal');
       }
 
-      console.log('🔄 Updating deal...');
+      console.log('Updating deal...');
 
       await authenticatedFetch(`deals?id=eq.${dealId}`, {
         method: 'PATCH',
         body: JSON.stringify(dealData)
       });
 
-      console.log('✅ Deal updated successfully');
+      console.log('Deal updated successfully');
     } catch (error) {
-      console.error('❌ Error updating deal:', error);
+      console.error('Error updating deal:', error);
       throw error;
     }
   },
@@ -530,15 +530,15 @@ export const dataService = {
         throw new Error('You must be logged in to delete a deal');
       }
 
-      console.log('🔄 Deleting deal...');
+      console.log('Deleting deal...');
 
       await authenticatedFetch(`deals?id=eq.${dealId}`, {
         method: 'DELETE'
       });
 
-      console.log('✅ Deal deleted successfully');
+      console.log('Deal deleted successfully');
     } catch (error) {
-      console.error('❌ Error deleting deal:', error);
+      console.error('Error deleting deal:', error);
       throw error;
     }
   },
@@ -591,7 +591,7 @@ export const dataService = {
         throw new Error('User not found');
       }
 
-      console.log('🔄 Adding business...');
+      console.log('Adding business...');
 
       const data = await authenticatedFetch('businesses', {
         method: 'POST',
@@ -602,10 +602,10 @@ export const dataService = {
         })
       });
 
-      console.log('✅ Business added successfully');
+      console.log('Business added successfully');
       return Array.isArray(data) ? data[0] : data;
     } catch (error) {
-      console.error('❌ Error adding business:', error);
+      console.error('Error adding business:', error);
       throw error;
     }
   },
@@ -623,7 +623,7 @@ export const dataService = {
         throw new Error('User not found');
       }
 
-      console.log('🔄 Updating business...');
+      console.log('Updating business...');
 
       // Ensure user owns this business
       await authenticatedFetch(`businesses?id=eq.${businessId}&owner_id=eq.${user.id}`, {
@@ -631,9 +631,9 @@ export const dataService = {
         body: JSON.stringify(businessData)
       });
 
-      console.log('✅ Business updated successfully');
+      console.log('Business updated successfully');
     } catch (error) {
-      console.error('❌ Error updating business:', error);
+      console.error('Error updating business:', error);
       throw error;
     }
   },
@@ -651,16 +651,16 @@ export const dataService = {
         throw new Error('User not found');
       }
 
-      console.log('🔄 Deleting business...');
+      console.log('Deleting business...');
 
       // Ensure user owns this business
       await authenticatedFetch(`businesses?id=eq.${businessId}&owner_id=eq.${user.id}`, {
         method: 'DELETE'
       });
 
-      console.log('✅ Business deleted successfully');
+      console.log('Business deleted successfully');
     } catch (error) {
-      console.error('❌ Error deleting business:', error);
+      console.error('Error deleting business:', error);
       throw error;
     }
   }
