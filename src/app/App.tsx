@@ -1,3 +1,4 @@
+// Core React and page component imports for routing and application view management
 import { useState, useEffect } from 'react';
 import { Navigation } from './components/navigation';
 import { HomePage } from './components/home-page';
@@ -52,11 +53,11 @@ export default function App() {
       // Only set user if session was successfully validated
       if (currentUser) {
         setUser(currentUser);
-        console.log('✅ Restored user session:', currentUser.email);
+        console.log('Restored user session:', currentUser.email);
       } else {
         // Ensure user is null if session validation failed
         setUser(null);
-        console.log('ℹ️ No valid session found');
+        console.log('No valid session found');
       }
     };
     
@@ -72,7 +73,7 @@ export default function App() {
       
       // If React thinks we have a user but authService says we don't
       if (user && !isAuth) {
-        console.warn('⚠️ State desync detected! React has user but authService does not.');
+        console.warn('State desync detected! React has user but authService does not.');
         console.warn('   This likely means the session was cleared due to validation failure.');
         console.warn('   Clearing React state to match...');
         setUser(null);
@@ -81,7 +82,7 @@ export default function App() {
       
       // If authService has a user but React doesn't
       if (!user && isAuth && authUser) {
-        console.warn('⚠️ State desync detected! authService has user but React does not. Syncing...');
+        console.warn('State desync detected! authService has user but React does not. Syncing...');
         setUser(authUser);
       }
     }, 5000); // Check every 5 seconds
@@ -97,10 +98,10 @@ export default function App() {
   // Load bookmarks when user changes
   useEffect(() => {
     if (user) {
-      console.log('👤 User logged in - loading bookmarks...');
+      console.log('User logged in - loading bookmarks...');
       loadBookmarks();
     } else {
-      console.log('👤 User logged out - clearing bookmarks...');
+      console.log('User logged out - clearing bookmarks...');
       setBookmarks([]);
     }
   }, [user]);
@@ -121,12 +122,12 @@ export default function App() {
   const loadData = async () => {
     setLoading(true);
     try {
-      console.log('🔄 Loading businesses...');
+      console.log('Loading businesses...');
       const businessesData = await dataService.getBusinesses();
       setBusinesses(businessesData);
-      console.log(`✅ Loaded ${businessesData.length} businesses`);
+      console.log(`Loaded ${businessesData.length} businesses`);
     } catch (error) {
-      console.error('❌ Error loading businesses:', error);
+      console.error('Error loading businesses:', error);
     } finally {
       setLoading(false);
     }
@@ -136,23 +137,23 @@ export default function App() {
     // Check if user is authenticated via authService directly
     // Don't rely on React state which might not be updated yet
     if (!authService.isAuthenticated()) {
-      console.log('⚠️ loadBookmarks: Not authenticated, clearing bookmarks');
+      console.log('loadBookmarks: Not authenticated, clearing bookmarks');
       setBookmarks([]);
       return;
     }
     
     const currentUser = authService.getCurrentUser();
     if (!currentUser) {
-      console.log('⚠️ loadBookmarks: No current user, clearing bookmarks');
+      console.log('loadBookmarks: No current user, clearing bookmarks');
       setBookmarks([]);
       return;
     }
     
     try {
-      console.log('🔍 loadBookmarks: Fetching for user:', currentUser.email);
+      console.log('loadBookmarks: Fetching for user:', currentUser.email);
       const bookmarksData = await dataService.getBookmarks();
       setBookmarks(bookmarksData);
-      console.log(`📑 Loaded ${bookmarksData.length} bookmarks for user ${currentUser.email}`);
+      console.log(`Loaded ${bookmarksData.length} bookmarks for user ${currentUser.email}`);
     } catch (error) {
       console.error('Error loading bookmarks:', error);
       setBookmarks([]);
@@ -189,14 +190,14 @@ export default function App() {
   const handleToggleBookmark = async (businessId: string) => {
     // Require sign-in for bookmarking
     if (!user) {
-      console.log('⚠️ handleToggleBookmark: No user in React state, showing auth modal');
+      console.log('handleToggleBookmark: No user in React state, showing auth modal');
       setShowAuthModal(true);
       return;
     }
     
     // Double-check with authService to ensure session is still valid
     if (!authService.isAuthenticated()) {
-      console.log('ℹ️ Session expired - clearing React state and showing auth modal');
+      console.log('Session expired - clearing React state and showing auth modal');
       
       // Sync React state with authService - clear the stale React user
       setUser(null);
@@ -211,22 +212,22 @@ export default function App() {
         ? bookmarks.filter(id => id !== businessId)
         : [...bookmarks, businessId];
       
-      console.log(`${wasBookmarked ? '💔' : '❤️'} ${wasBookmarked ? 'Removed from' : 'Added to'} favorites:`, businessId);
+      console.log(`${wasBookmarked ? 'Removed from' : 'Added to'} favorites:`, businessId);
       
       // Update local state optimistically
       setBookmarks(newBookmarks);
       
       // Save to server
-      console.log('📤 About to call dataService.saveBookmarks...');
+      console.log('About to call dataService.saveBookmarks...');
       await dataService.saveBookmarks(newBookmarks);
       
-      console.log('✅ Bookmarks updated successfully. Total:', newBookmarks.length);
+      console.log('Bookmarks updated successfully. Total:', newBookmarks.length);
     } catch (error) {
-      console.error('❌ Error toggling bookmark:', error);
+      console.error('Error toggling bookmark:', error);
       
       // Check if this is a session expired error
       if (error instanceof Error && error.message.includes('Session expired')) {
-        console.log('ℹ️ Session expired during bookmark save - showing auth modal');
+        console.log('Session expired during bookmark save - showing auth modal');
         // Session was cleared by dataService, sync React state
         setUser(null);
         setBookmarks([]);
@@ -235,7 +236,7 @@ export default function App() {
       }
       
       // For other errors, show alert
-      console.error('❌ Error details:', {
+      console.error('Error details:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
       });
@@ -243,7 +244,7 @@ export default function App() {
       alert(`Failed to save bookmark: ${error instanceof Error ? error.message : 'Unknown error'}`);
       
       // Revert optimistic update on error
-      console.log('🔄 Reverting optimistic update, reloading bookmarks from server...');
+      console.log('Reverting optimistic update, reloading bookmarks from server...');
       loadBookmarks();
     }
   };
@@ -260,7 +261,7 @@ export default function App() {
     if (!selectedBusinessId || !user) return;
 
     try {
-      console.log('📝 Submitting review...', { businessId: selectedBusinessId, userId: user.id, rating: reviewData.rating });
+      console.log('Submitting review...', { businessId: selectedBusinessId, userId: user.id, rating: reviewData.rating });
       
       const newReview = await dataService.addReview(
         selectedBusinessId,
@@ -269,7 +270,7 @@ export default function App() {
       );
 
       if (newReview) {
-        console.log('✅ Review submitted successfully:', newReview);
+        console.log('Review submitted successfully:', newReview);
         setReviews(prev => [newReview, ...prev]);
         // Reload businesses to update ratings
         await loadData();
@@ -281,7 +282,7 @@ export default function App() {
       
       setShowReviewForm(false);
     } catch (error) {
-      console.error('❌ Error submitting review:', error);
+      console.error('Error submitting review:', error);
       
       // Show detailed error message
       let errorMessage = 'Failed to submit review. Please try again.';
@@ -308,15 +309,15 @@ export default function App() {
   };
 
   const handleAuthSuccess = async (newUser: User) => {
-    console.log('✅ Auth success, setting user:', newUser.email);
+    console.log('Auth success, setting user:', newUser.email);
     setUser(newUser);
     setShowAuthModal(false);
     
     // Wait a moment and verify auth state before loading bookmarks
     await new Promise(resolve => setTimeout(resolve, 100));
     
-    console.log('🔄 Loading bookmarks after successful auth...');
-    console.log('🔍 Auth verification:', {
+    console.log('Loading bookmarks after successful auth...');
+    console.log('Auth verification:', {
       userState: !!newUser,
       isAuthenticated: authService.isAuthenticated(),
       currentUser: authService.getCurrentUser()?.email,
@@ -327,8 +328,8 @@ export default function App() {
     if (authService.isAuthenticated()) {
       await loadBookmarks();
     } else {
-      console.error('⚠️ User signed in but authService reports not authenticated!');
-      console.error('⚠️ This indicates a critical state synchronization issue');
+      console.error('User signed in but authService reports not authenticated!');
+      console.error('This indicates a critical state synchronization issue');
     }
   };
 
@@ -428,28 +429,28 @@ export default function App() {
     if (!managingDealsForBusinessId) return;
     
     try {
-      console.log('📝 Adding deal for business:', managingDealsForBusinessId);
-      console.log('📝 Deal data:', dealData);
+      console.log('Adding deal for business:', managingDealsForBusinessId);
+      console.log('Deal data:', dealData);
       await dataService.addDeal(managingDealsForBusinessId, dealData);
       await loadUserBusinesses();
       await loadData(); // Reload all businesses to update has_deal flags
-      console.log('✅ Deal added successfully');
+      console.log('Deal added successfully');
     } catch (error) {
-      console.error('❌ Error adding deal:', error);
+      console.error('Error adding deal:', error);
       alert(`Failed to add deal: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
   const handleUpdateDeal = async (dealId: string, dealData: Partial<Deal>) => {
     try {
-      console.log('📝 Updating deal:', dealId);
-      console.log('📝 Deal data:', dealData);
+      console.log('Updating deal:', dealId);
+      console.log('Deal data:', dealData);
       await dataService.updateDeal(dealId, dealData);
       await loadUserBusinesses();
       await loadData();
-      console.log('✅ Deal updated successfully');
+      console.log('Deal updated successfully');
     } catch (error) {
-      console.error('❌ Error updating deal:', error);
+      console.error('Error updating deal:', error);
       alert(`Failed to update deal: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
@@ -458,13 +459,13 @@ export default function App() {
     if (!confirm('Are you sure you want to delete this deal?')) return;
     
     try {
-      console.log('🗑️ Deleting deal:', dealId);
+      console.log('Deleting deal:', dealId);
       await dataService.deleteDeal(dealId);
       await loadUserBusinesses();
       await loadData();
-      console.log('✅ Deal deleted successfully');
+      console.log('Deal deleted successfully');
     } catch (error) {
-      console.error('❌ Error deleting deal:', error);
+      console.error('Error deleting deal:', error);
       alert(`Failed to delete deal: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
