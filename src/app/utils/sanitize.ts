@@ -1,58 +1,45 @@
-/**
- * SQL injection detection and input sanitization utilities.
- *
- * The backend already uses parameterized queries (Supabase JS client), so
- * there is no direct SQL injection risk. These checks provide defense-in-depth
- * at the client layer: catching clearly malicious input early and giving
- * users a clear, immediate error rather than a cryptic server failure.
- *
- * Detection focuses on *combinations* that strongly indicate injection
- * (e.g. a quote immediately followed by a SQL keyword, stacked statements,
- * comment sequences) rather than individual SQL words, which avoids
- * false-positives on legitimate text like "O'Brien" or "update your review".
- */
+// SQL injection check and input cleaning utils.
+// Backend is already safe with parameterized queries (Supabase client).
+// This is just a client-side layer to catch bad input early and show errors
+// instead of letting the server crash with a cryptic error.
+// It looks for sketchy combinations (quotes near keywords, stacked queries, 
+// comments) so normal text like "O'Brien" or "update" doesn't trigger it.
 
 const INJECTION_PATTERNS: RegExp[] = [
-  // Quote immediately followed by SQL keyword or comment marker
+  // quote followed by sql keyword or comment
   /['"]\s*(--|\/\*|OR\b|AND\b|UNION\b|SELECT\b|INSERT\b|UPDATE\b|DELETE\b|DROP\b|ALTER\b|EXEC\b|EXECUTE\b|CREATE\b|TRUNCATE\b)/i,
 
-  // Stacked statement: semicolon then a destructive keyword
+  // semicolon then a destructive keyword
   /;\s*(DROP\b|DELETE\b|INSERT\b|UPDATE\b|TRUNCATE\b|ALTER\b|CREATE\b|EXEC\b|EXECUTE\b)/i,
 
-  // UNION-based data extraction
+  // union select hacks
   /\bUNION\s+(ALL\s+)?SELECT\b/i,
 
-  // SQL single-line comment (-- anything)
+  // sql single-line comment
   /--[^\n]*/,
 
-  // SQL block comment
+  // sql block comment
   /\/\*[\s\S]*?\*\//,
 
-  // SQL Server extended stored procedures
+  // sql server extended stored procedures
   /\bxp_\w+/i,
 
-  // EXEC/EXECUTE with parenthesis (stored procedure calls)
+  // exec procedure calls
   /\b(EXEC|EXECUTE)\s*\(/i,
 
-  // Hex-encoded bypass attempts
+  // hex bypass attempts
   /0x[0-9a-fA-F]{4,}/,
 
-  // Classic tautology: OR/AND with quoted string equality
+  // classic 1=1 or tautology bypasses
   /\b(OR|AND)\s+['"]\w+['"]\s*=\s*['"]\w+['"]/i,
 ];
 
-/**
- * Returns true if the value contains patterns that strongly indicate
- * a SQL injection attempt.
- */
+// returns true if input looks like a SQL injection attempt
 export function hasSqlInjection(value: string): boolean {
   return INJECTION_PATTERNS.some(pattern => pattern.test(value));
 }
 
-/**
- * Checks every field in a map and returns a parallel map of error strings.
- * Only fields that fail injection detection get an error entry.
- */
+// checks a map of fields and returns errors for the bad ones
 export function validateFieldsForInjection(
   fields: Record<string, string>
 ): Record<string, string> {
@@ -65,7 +52,7 @@ export function validateFieldsForInjection(
   return errors;
 }
 
-/** Single-field helper used inline in change handlers. */
+// quick helper for change handlers
 export function sqlInjectionError(value: string): string {
   return hasSqlInjection(value)
     ? 'Invalid characters detected. Please remove special SQL syntax.'
