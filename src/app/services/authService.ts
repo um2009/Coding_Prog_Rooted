@@ -27,7 +27,7 @@ class AuthService {
   }
 
   private restoreSession(): void {
-    console.log('🔄 Restoring session from localStorage...');
+    console.log('Restoring session from localStorage...');
     
     const savedUser = localStorage.getItem('rooted-user');
     const savedToken = localStorage.getItem('rooted-access-token');
@@ -46,29 +46,29 @@ class AuthService {
             const now = Date.now();
             
             if (expiresAt < now) {
-              console.log('ℹ️ Stored token is expired - clearing session');
+              console.log('Stored token is expired - clearing session');
               this.clearSession();
               this.sessionRestored = true;
               return;
             }
             
-            console.log('✅ Token expires at:', new Date(expiresAt).toISOString());
-            console.log('✅ Token is valid for:', Math.round((expiresAt - now) / 1000 / 60), 'more minutes');
+            console.log('Token expires at:', new Date(expiresAt).toISOString());
+            console.log('Token is valid for:', Math.round((expiresAt - now) / 1000 / 60), 'more minutes');
           }
         } catch (e) {
-          console.log('ℹ️ Could not validate token - clearing session');
+          console.log('Could not validate token - clearing session');
           this.clearSession();
           this.sessionRestored = true;
           return;
         }
         
-        console.log('✅ Session restored:', this.currentUser.email);
+        console.log('Session restored:', this.currentUser.email);
       } catch (error) {
         console.error('Error parsing saved session:', error);
         this.clearSession();
       }
     } else {
-      console.log('ℹ️ No saved session found');
+      console.log('No saved session found');
     }
     
     this.sessionRestored = true;
@@ -82,9 +82,9 @@ class AuthService {
   }
 
   private saveSession(user: User, token: string) {
-    console.log('💾 Saving session for user:', user.email);
-    console.log('💾 Token length:', token.length);
-    console.log('💾 Token preview:', token.substring(0, 20) + '...' + token.substring(token.length - 10));
+    console.log('Saving session for user:', user.email);
+    console.log('Token length:', token.length);
+    console.log('Token preview:', token.substring(0, 20) + '...' + token.substring(token.length - 10));
     
     // Set instance variables FIRST
     this.currentUser = user;
@@ -95,19 +95,19 @@ class AuthService {
     try {
       localStorage.setItem('rooted-user', JSON.stringify(user));
       localStorage.setItem('rooted-access-token', token);
-      console.log('✅ Session saved to localStorage successfully');
+      console.log('Session saved to localStorage successfully');
     } catch (e) {
-      console.error('❌ Failed to save session to localStorage:', e);
+      console.error('Failed to save session to localStorage:', e);
     }
     
     // Verify the save worked
     const savedUser = localStorage.getItem('rooted-user');
     const savedToken = localStorage.getItem('rooted-access-token');
-    console.log('✅ Verification - localStorage has user:', !!savedUser);
-    console.log('✅ Verification - localStorage has token:', !!savedToken);
+    console.log('Verification - localStorage has user:', !!savedUser);
+    console.log('Verification - localStorage has token:', !!savedToken);
     
     // Verify instance state
-    console.log('🔍 Auth state after save:', {
+    console.log('Auth state after save:', {
       hasCurrentUser: !!this.currentUser,
       currentUserEmail: this.currentUser?.email,
       hasAccessToken: !!this.accessToken,
@@ -118,7 +118,7 @@ class AuthService {
   }
 
   private clearSession() {
-    console.log('🧹 Session cleared');
+    console.log('Session cleared');
     this.currentUser = null;
     this.accessToken = null;
     localStorage.removeItem('rooted-user');
@@ -144,7 +144,7 @@ class AuthService {
         throw new Error(data.error || 'Signup failed');
       }
 
-      console.log('✅ Signup successful:', data.user.email);
+      console.log('Signup successful:', data.user.email);
       
       // After signup, sign in automatically
       return await this.signIn(email, password);
@@ -172,8 +172,8 @@ class AuthService {
       }
 
       this.saveSession(data.user, data.session.access_token);
-      console.log('✅ Signin successful:', data.user.email);
-      console.log('✅ Access token saved:', data.session.access_token.substring(0, 30) + '...');
+      console.log('Signin successful:', data.user.email);
+      console.log('Access token saved:', data.session.access_token.substring(0, 30) + '...');
       
       return data.user;
     } catch (error) {
@@ -194,7 +194,7 @@ class AuthService {
       }
       
       this.clearSession();
-      console.log('✅ Signed out successfully');
+      console.log('Signed out successfully');
     } catch (error) {
       console.error('Signout error:', error);
       // Clear session anyway
@@ -209,11 +209,11 @@ class AuthService {
       const savedToken = localStorage.getItem('rooted-access-token');
       if (savedUser && savedToken) {
         try {
-          console.warn('⚠️ getCurrentUser: Memory cleared but localStorage has session! Restoring...');
+          console.warn('getCurrentUser: Memory cleared but localStorage has session! Restoring...');
           this.currentUser = JSON.parse(savedUser);
           this.accessToken = savedToken;
         } catch (e) {
-          console.error('❌ Failed to restore from localStorage:', e);
+          console.error('Failed to restore from localStorage:', e);
         }
       }
     }
@@ -227,11 +227,11 @@ class AuthService {
       const savedUser = localStorage.getItem('rooted-user');
       if (savedToken && savedUser) {
         try {
-          console.warn('⚠️ getAccessToken: Memory cleared but localStorage has session! Restoring...');
+          console.warn('getAccessToken: Memory cleared but localStorage has session! Restoring...');
           this.accessToken = savedToken;
           this.currentUser = JSON.parse(savedUser);
         } catch (e) {
-          console.error('❌ Failed to restore from localStorage:', e);
+          console.error('Failed to restore from localStorage:', e);
         }
       }
     }
