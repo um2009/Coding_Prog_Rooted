@@ -2,13 +2,18 @@ import { useState } from 'react';
 import { Keyboard, Volume2, Eye, CheckCircle2, X, AlertCircle } from 'lucide-react';
 
 export function AccessibilityDemoGuide() {
+  // tracks which testing guide panel is currently open
   const [activeTest, setActiveTest] = useState<'keyboard' | 'screenreader' | 'aria' | null>(null);
 
   return (
+    // main page container with full height background
     <div className="min-h-screen bg-background">
+      {/* inner wrapper to keep the layout centered and maxed out at a readable width */}
       <div className="max-w-5xl mx-auto px-4 py-6">
-        {/* Header */}
+        
+        {/* main intro header section */}
         <div className="text-center mb-8">
+          {/* circle container for the top decorative icon */}
           <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <Eye className="w-8 h-8 text-primary" aria-hidden="true" />
           </div>
@@ -18,8 +23,9 @@ export function AccessibilityDemoGuide() {
           </p>
         </div>
 
-        {/* Testing Cards */}
+        {/* grid layout containing the 3 clickable cards to pick a testing mode */}
         <div className="grid gap-6 md:grid-cols-3 mb-8">
+          {/* card 1: opens the keyboard shortcuts section */}
           <button
             onClick={() => setActiveTest('keyboard')}
             className="bg-card border-2 border-border rounded-lg p-6 hover:border-primary transition-all text-left group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -30,6 +36,7 @@ export function AccessibilityDemoGuide() {
             <p className="text-sm text-muted-foreground">Test full keyboard accessibility</p>
           </button>
 
+          {/* card 2: opens the screen reader tools section */}
           <button
             onClick={() => setActiveTest('screenreader')}
             className="bg-card border-2 border-border rounded-lg p-6 hover:border-primary transition-all text-left group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -40,6 +47,7 @@ export function AccessibilityDemoGuide() {
             <p className="text-sm text-muted-foreground">Test screen reader compatibility</p>
           </button>
 
+          {/* card 3: opens the aria inspection section */}
           <button
             onClick={() => setActiveTest('aria')}
             className="bg-card border-2 border-border rounded-lg p-6 hover:border-primary transition-all text-left group focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -51,14 +59,16 @@ export function AccessibilityDemoGuide() {
           </button>
         </div>
 
-        {/* Keyboard Navigation Guide */}
+        {/* conditional block that shows up when the user clicks keyboard navigation */}
         {activeTest === 'keyboard' && (
           <div className="bg-card border border-border rounded-lg overflow-hidden mb-8">
+            {/* dynamic panel header with close action */}
             <div className="bg-primary/10 border-b border-border px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Keyboard className="w-6 h-6 text-primary" aria-hidden="true" />
                 <h2 className="text-xl font-semibold text-foreground">Keyboard Navigation Testing</h2>
               </div>
+              {/* x button resets active state to null which closes this panel */}
               <button
                 onClick={() => setActiveTest(null)}
                 className="p-2 hover:bg-accent rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
@@ -68,7 +78,9 @@ export function AccessibilityDemoGuide() {
               </button>
             </div>
             
+            {/* keyboard steps panel body */}
             <div className="p-6 space-y-6">
+              {/* blue alert notice for quick info before starting */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5" aria-hidden="true" />
@@ -80,10 +92,12 @@ export function AccessibilityDemoGuide() {
                 </p>
               </div>
 
+              {/* step by step list grid */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-foreground text-lg">Step-by-Step Testing:</h3>
                 
                 <div className="space-y-3">
+                  {/* step 1 container */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       1
@@ -101,6 +115,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 2 container */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       2
@@ -118,6 +133,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 3 container */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       3
@@ -135,6 +151,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 4 container */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       4
@@ -152,6 +169,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 5 container */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       5
@@ -168,6 +186,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 6 container */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       6
@@ -184,6 +203,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 7 container */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       7
@@ -201,6 +221,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 8 container */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       8
@@ -219,8 +240,9 @@ export function AccessibilityDemoGuide() {
                 </div>
               </div>
 
+              {/* green bottom card containing the quick compliance checklist items */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-900 mb-2">✅ Keyboard Navigation Checklist</h3>
+                <h3 className="font-semibold text-green-900 mb-2">Keyboard Navigation Checklist</h3>
                 <ul className="text-sm text-green-800 space-y-1">
                   <li>✓ Skip link appears on first Tab press</li>
                   <li>✓ All interactive elements have visible focus indicators (blue rings)</li>
@@ -236,14 +258,16 @@ export function AccessibilityDemoGuide() {
           </div>
         )}
 
-        {/* Screen Reader Guide */}
+        {/* conditional block that shows up when user clicks screen reader section */}
         {activeTest === 'screenreader' && (
           <div className="bg-card border border-border rounded-lg overflow-hidden mb-8">
+            {/* dynamic panel header with close action */}
             <div className="bg-primary/10 border-b border-border px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Volume2 className="w-6 h-6 text-primary" aria-hidden="true" />
                 <h2 className="text-xl font-semibold text-foreground">Screen Reader Testing</h2>
               </div>
+              {/* x button closes the screen reader pane */}
               <button
                 onClick={() => setActiveTest(null)}
                 className="p-2 hover:bg-accent rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
@@ -253,7 +277,9 @@ export function AccessibilityDemoGuide() {
               </button>
             </div>
             
+            {/* screen reader pane body details */}
             <div className="p-6 space-y-6">
+              {/* blue context window listing required external tools */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5" aria-hidden="true" />
@@ -269,10 +295,12 @@ export function AccessibilityDemoGuide() {
                 </ul>
               </div>
 
+              {/* active interactive testing guide items */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-foreground text-lg">How to Test with Screen Reader:</h3>
                 
                 <div className="space-y-3">
+                  {/* step 1 box */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       1
@@ -291,6 +319,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 2 box */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       2
@@ -313,6 +342,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 3 box */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       3
@@ -329,6 +359,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 4 box */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       4
@@ -345,6 +376,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 5 box */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       5
@@ -361,6 +393,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* step 6 box */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       6
@@ -379,8 +412,9 @@ export function AccessibilityDemoGuide() {
                 </div>
               </div>
 
+              {/* green bottom card containing screen reader metrics */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-900 mb-2">✅ Screen Reader Support Checklist</h3>
+                <h3 className="font-semibold text-green-900 mb-2">Screen Reader Support Checklist</h3>
                 <ul className="text-sm text-green-800 space-y-1">
                   <li>✓ All interactive elements are announced with their role (button, link, etc.)</li>
                   <li>✓ Descriptive labels provided via aria-label</li>
@@ -396,14 +430,16 @@ export function AccessibilityDemoGuide() {
           </div>
         )}
 
-        {/* ARIA Labels Guide */}
+        {/* conditional block that shows up when user selects the aria options tab */}
         {activeTest === 'aria' && (
           <div className="bg-card border border-border rounded-lg overflow-hidden mb-8">
+            {/* dynamic panel header with close action */}
             <div className="bg-primary/10 border-b border-border px-6 py-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Eye className="w-6 h-6 text-primary" aria-hidden="true" />
                 <h2 className="text-xl font-semibold text-foreground">ARIA Labels Verification</h2>
               </div>
+              {/* x button closes the current aria panel context */}
               <button
                 onClick={() => setActiveTest(null)}
                 className="p-2 hover:bg-accent rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
@@ -413,7 +449,9 @@ export function AccessibilityDemoGuide() {
               </button>
             </div>
             
+            {/* instructional content panel body for developers */}
             <div className="p-6 space-y-6">
+              {/* blue overview helper card explaining standard mechanics */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5" aria-hidden="true" />
@@ -425,10 +463,12 @@ export function AccessibilityDemoGuide() {
                 </p>
               </div>
 
+              {/* inspection breakdown sequence */}
               <div className="space-y-4">
                 <h3 className="font-semibold text-foreground text-lg">How to Inspect ARIA Labels:</h3>
                 
                 <div className="space-y-3">
+                  {/* devtools step 1 item */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       1
@@ -445,6 +485,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* devtools step 2 item */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       2
@@ -461,6 +502,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* devtools step 3 item */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       3
@@ -470,6 +512,7 @@ export function AccessibilityDemoGuide() {
                       <p className="text-sm text-muted-foreground mb-2">
                         In the Elements tab, look for these attributes in the HTML:
                       </p>
+                      {/* list outlining the actual attributes inside the inspector */}
                       <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
                         <li><code className="bg-background px-1 py-0.5 rounded text-xs">aria-label="..."</code> - Descriptive label</li>
                         <li><code className="bg-background px-1 py-0.5 rounded text-xs">aria-pressed="true"</code> - Toggle state</li>
@@ -485,6 +528,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* devtools step 4 item */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       4
@@ -494,6 +538,7 @@ export function AccessibilityDemoGuide() {
                       <p className="text-sm text-muted-foreground mb-2">
                         Examples of elements with ARIA labels in Rooted:
                       </p>
+                      {/* sub-grid containing plain code element block examples */}
                       <div className="bg-background rounded-lg p-3 space-y-2 text-xs font-mono">
                         <div className="border-l-2 border-primary pl-2">
                           <div className="text-muted-foreground mb-1">Compare button:</div>
@@ -503,15 +548,18 @@ export function AccessibilityDemoGuide() {
                           <div className="text-muted-foreground mb-1">Search input:</div>
                           <code className="text-foreground">&lt;input aria-label="Search businesses by name, category, or district"&gt;</code>
                         </div>
+{/* Example item for checking a filter button's aria attributes */}
                         <div className="border-l-2 border-primary pl-2">
                           <div className="text-muted-foreground mb-1">Filter button:</div>
                           <code className="text-foreground">&lt;button aria-label="Filter by Food" aria-pressed="true"&gt;</code>
                         </div>
+                        {/* Example item showing how a purely decorative icon is hidden from screen readers */}
                         <div className="border-l-2 border-primary pl-2">
                           <div className="text-muted-foreground mb-1">Decorative icon:</div>
                           <code className="text-foreground">&lt;Search aria-hidden="true" /&gt;</code>
                         </div>
                       </div>
+                      {/* Instructions caption reminder at the bottom of the code list */}
                       <div className="flex items-center gap-2 text-sm mt-2">
                         <CheckCircle2 className="w-4 h-4 text-green-600" aria-hidden="true" />
                         <span className="text-green-700">Inspect these elements to verify ARIA attributes</span>
@@ -519,6 +567,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* Devtools step 5 item: inspecting via the specialized browser accessibility panel */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       5
@@ -535,6 +584,7 @@ export function AccessibilityDemoGuide() {
                     </div>
                   </div>
 
+                  {/* Devtools step 6 item: running an automated lighthouse testing suite */}
                   <div className="flex items-start gap-3 p-4 bg-accent/20 rounded-lg">
                     <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold">
                       6
@@ -553,28 +603,30 @@ export function AccessibilityDemoGuide() {
                 </div>
               </div>
 
+              {/* Green evaluation checklist matching criteria for a successful aria design layout */}
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <h3 className="font-semibold text-green-900 mb-2">✅ ARIA Implementation Checklist</h3>
+                <h3 className="font-semibold text-green-900 mb-2">ARIA Implementation Checklist</h3>
                 <ul className="text-sm text-green-800 space-y-1">
-                  <li>✓ All buttons have aria-label or visible text</li>
-                  <li>✓ Interactive icons have descriptive aria-labels</li>
-                  <li>✓ Decorative icons have aria-hidden="true"</li>
-                  <li>✓ Toggle buttons use aria-pressed</li>
-                  <li>✓ Expandable sections use aria-expanded</li>
-                  <li>✓ Modals have role="dialog" and aria-modal="true"</li>
-                  <li>✓ Form inputs have aria-label or associated &lt;label&gt;</li>
-                  <li>✓ Search inputs describe their purpose</li>
+                  <li>- All buttons have aria-label or visible text</li>
+                  <li>- Interactive icons have descriptive aria-labels</li>
+                  <li>- Decorative icons have aria-hidden="true"</li>
+                  <li>- Toggle buttons use aria-pressed</li>
+                  <li>- Expandable sections use aria-expanded</li>
+                  <li>- Modals have role="dialog" and aria-modal="true"</li>
+                  <li>- Form inputs have aria-label or associated &lt;label&gt;</li>
+                  <li>- Search inputs describe their purpose</li>
                 </ul>
               </div>
             </div>
           </div>
         )}
 
-        {/* Summary Card */}
+        {/* Summary Card: Only renders when no active testing tab panel is currently open */}
         {!activeTest && (
           <div className="bg-gradient-to-r from-primary/10 to-green-500/10 border border-primary/20 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-foreground mb-3">Quick Testing Summary</h2>
             <div className="grid md:grid-cols-3 gap-4 text-sm">
+              {/* Summary box for keyboard expectations */}
               <div className="bg-background rounded-lg p-4">
                 <Keyboard className="w-8 h-8 text-primary mb-2" aria-hidden="true" />
                 <h3 className="font-medium text-foreground mb-1">Keyboard</h3>
@@ -582,6 +634,7 @@ export function AccessibilityDemoGuide() {
                   Press Tab to navigate. All elements should have blue focus rings and work without a mouse.
                 </p>
               </div>
+              {/* Summary box for screen reader setup */}
               <div className="bg-background rounded-lg p-4">
                 <Volume2 className="w-8 h-8 text-primary mb-2" aria-hidden="true" />
                 <h3 className="font-medium text-foreground mb-1">Screen Reader</h3>
@@ -589,6 +642,7 @@ export function AccessibilityDemoGuide() {
                   Enable NVDA, VoiceOver, or ChromeVox. Every element should announce its purpose clearly.
                 </p>
               </div>
+              {/* Summary box for verifying aria hooks via developer tools */}
               <div className="bg-background rounded-lg p-4">
                 <Eye className="w-8 h-8 text-primary mb-2" aria-hidden="true" />
                 <h3 className="font-medium text-foreground mb-1">ARIA Labels</h3>
