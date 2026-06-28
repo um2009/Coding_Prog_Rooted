@@ -1,13 +1,11 @@
 import { useState, useMemo, useRef } from 'react';
 import { MapView } from './map-view';
 import { BusinessCard } from './business-card';
-import { Map, List, ArrowUpDown, DollarSign, Tag, MapPin, Search, BarChart3, X, Download } from 'lucide-react';
+import { Map, List, ArrowUpDown, Search, BarChart3, X, Download } from 'lucide-react';
 import { Business, SortOption, ViewMode, PriceRange, Category } from '@/app/types/business';
 import { ContextualHelp } from './contextual-help';
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { AlertCircle } from 'lucide-react';
 
 interface BrowsePageProps {
@@ -16,22 +14,21 @@ interface BrowsePageProps {
 }
 
 export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
+  // Navigation layout state monitors determining present display layouts
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>('default');
   const [minRating, setMinRating] = useState<number>(0);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRange[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [searchError, setSearchError] = useState<string>('');
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [comparisonBusiness1, setComparisonBusiness1] = useState<string>('');
   const [comparisonBusiness2, setComparisonBusiness2] = useState<string>('');
-  const [comparisonTab, setComparisonTab] = useState<'rating' | 'reviews' | 'price'>('rating');
   const comparisonRef = useRef<HTMLDivElement>(null);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  // PDF Export Function
+  // Structural report generator engine converting visual metric values to saved text files
   const handleExportPDF = async () => {
     if (!comparisonRef.current || !comparisonBusiness1 || !comparisonBusiness2) {
       setShowExportModal(true);
@@ -46,52 +43,42 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
       
       if (!business1 || !business2) return;
 
-      // Create PDF
       const doc = new jsPDF('p', 'mm', 'a4');
-      
       let yPos = 20;
       const pageWidth = 210;
       const margin = 15;
       const contentWidth = pageWidth - (margin * 2);
       
-      // Title
       doc.setFontSize(20);
       doc.setFont(undefined, 'bold');
       doc.text('Business Comparison Report', pageWidth / 2, yPos, { align: 'center' });
       yPos += 10;
       
-      // Date
       doc.setFontSize(10);
       doc.setFont(undefined, 'normal');
       doc.text(`Generated on ${new Date().toLocaleDateString()}`, pageWidth / 2, yPos, { align: 'center' });
       yPos += 15;
       
-      // Business names
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
-      doc.setTextColor(22, 163, 74); // Primary green
+      doc.setTextColor(22, 163, 74); 
       doc.text(`${business1.name}`, margin + 35, yPos, { align: 'center' });
       doc.setTextColor(0, 0, 0);
       doc.text('vs', pageWidth / 2, yPos, { align: 'center' });
-      doc.setTextColor(59, 130, 246); // Blue
+      doc.setTextColor(59, 130, 246); 
       doc.text(`${business2.name}`, pageWidth - margin - 35, yPos, { align: 'center' });
       doc.setTextColor(0, 0, 0);
       yPos += 12;
       
-      // Table with borders
       doc.setFontSize(10);
-      
-      const tableStartY = yPos;
       const rowHeight = 9;
       const col1X = margin;
       const col2X = margin + 60;
       const col3X = margin + 120;
-      const tableWidth = contentWidth;
       const col1Width = 60;
       const col2Width = 60;
       const col3Width = 60;
       
-      // Helper function to draw table cell
       const drawCell = (text: string, x: number, y: number, width: number, height: number, isHeader = false) => {
         doc.rect(x, y, width, height);
         if (isHeader) {
@@ -100,20 +87,18 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
           doc.setTextColor(255, 255, 255);
           doc.setFont(undefined, 'bold');
         }
-        doc.text(text, x + 3, y + 6);
+        doc.text(text || '', x + 3, y + 6);
         if (isHeader) {
           doc.setTextColor(0, 0, 0);
           doc.setFont(undefined, 'normal');
         }
       };
       
-      // Table Header
       drawCell('Metric', col1X, yPos, col1Width, rowHeight, true);
       drawCell(business1.name.substring(0, 15), col2X, yPos, col2Width, rowHeight, true);
       drawCell(business2.name.substring(0, 15), col3X, yPos, col3Width, rowHeight, true);
       yPos += rowHeight;
       
-      // Table Rows
       const rows = [
         ['Category', business1.category, business2.category],
         ['Rating', `${(business1.rating ?? 0).toFixed(1)} stars`, `${(business2.rating ?? 0).toFixed(1)} stars`],
@@ -132,36 +117,30 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
       
       yPos += 10;
       
-      // Draw custom bar chart using canvas
       doc.setFont(undefined, 'bold');
       doc.setFontSize(12);
       doc.text('Metrics Visualization', margin, yPos);
       yPos += 8;
       
-      // Create canvas for chart
       const canvas = document.createElement('canvas');
       canvas.width = 900;
       canvas.height = 400;
       const ctx = canvas.getContext('2d');
       
       if (ctx) {
-        // White background
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, 900, 400);
         
-        // Chart configuration
         const chartMargin = { top: 40, right: 200, bottom: 60, left: 60 };
         const chartWidth = 900 - chartMargin.left - chartMargin.right;
         const chartHeight = 400 - chartMargin.top - chartMargin.bottom;
         
-        // Data
         const metrics = [
           { label: 'Rating', val1: business1.rating, val2: business2.rating, max: 5 },
-          { label: 'Reviews', val1: business1.review_count, val2: business2.review_count, max: Math.max(business1.review_count, business2.review_count) },
-          { label: 'Avg Price ($)', val1: business1.avg_price, val2: business2.avg_price, max: Math.max(business1.avg_price, business2.avg_price) },
+          { label: 'Reviews', val1: business1.review_count, val2: business2.review_count, max: Math.max(business1.review_count, business2.review_count) || 1 },
+          { label: 'Avg Price ($)', val1: business1.avg_price, val2: business2.avg_price, max: Math.max(business1.avg_price, business2.avg_price) || 1 },
         ];
         
-        // Draw grid lines
         ctx.strokeStyle = '#e5e7eb';
         ctx.lineWidth = 1;
         for (let i = 0; i <= 5; i++) {
@@ -172,18 +151,15 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
           ctx.stroke();
         }
         
-        // Draw bars
         const barGroupWidth = chartWidth / metrics.length;
         const barWidth = barGroupWidth / 3;
         
         metrics.forEach((metric, index) => {
           const x = chartMargin.left + index * barGroupWidth;
           
-          // Normalize heights
           const height1 = (metric.val1 / metric.max) * chartHeight;
           const height2 = (metric.val2 / metric.max) * chartHeight;
           
-          // Business 1 bar (green)
           ctx.fillStyle = '#16a34a';
           ctx.fillRect(
             x + barWidth * 0.5,
@@ -192,7 +168,6 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
             height1
           );
           
-          // Business 2 bar (blue)
           ctx.fillStyle = '#3b82f6';
           ctx.fillRect(
             x + barWidth * 1.5,
@@ -201,30 +176,25 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
             height2
           );
           
-          // X-axis label
           ctx.fillStyle = '#374151';
           ctx.font = 'bold 16px Arial';
           ctx.textAlign = 'center';
           ctx.fillText(metric.label, x + barGroupWidth / 2, chartMargin.top + chartHeight + 30);
         });
         
-        // Legend
         ctx.font = '16px Arial';
         ctx.textAlign = 'left';
         
-        // Business 1 legend
         ctx.fillStyle = '#16a34a';
         ctx.fillRect(chartMargin.left + chartWidth + 30, chartMargin.top + 20, 25, 20);
         ctx.fillStyle = '#374151';
         ctx.fillText(business1.name.substring(0, 20), chartMargin.left + chartWidth + 65, chartMargin.top + 35);
         
-        // Business 2 legend
         ctx.fillStyle = '#3b82f6';
         ctx.fillRect(chartMargin.left + chartWidth + 30, chartMargin.top + 55, 25, 20);
         ctx.fillStyle = '#374151';
         ctx.fillText(business2.name.substring(0, 20), chartMargin.left + chartWidth + 65, chartMargin.top + 70);
         
-        // Y-axis label
         ctx.save();
         ctx.translate(25, chartMargin.top + chartHeight / 2);
         ctx.rotate(-Math.PI / 2);
@@ -234,15 +204,13 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
         ctx.fillText('Normalized Value', 0, 0);
         ctx.restore();
         
-        // Convert canvas to image and add to PDF
         const chartImageData = canvas.toDataURL('image/png');
         const chartWidth_mm = contentWidth;
-        const chartHeight_mm = (400 / 900) * chartWidth_mm; // Maintain aspect ratio
+        const chartHeight_mm = (400 / 900) * chartWidth_mm; 
         doc.addImage(chartImageData, 'PNG', margin, yPos, chartWidth_mm, chartHeight_mm);
         yPos += chartHeight_mm + 10;
       }
       
-      // Summary Section
       doc.setFont(undefined, 'bold');
       doc.setFontSize(12);
       doc.text('Comparison Summary', margin, yPos);
@@ -252,11 +220,11 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
       doc.setFont(undefined, 'normal');
       
       const higherRating = business1.rating > business2.rating ? business1.name : 
-                          business2.rating > business1.rating ? business2.name : 'Tie';
+                           business2.rating > business1.rating ? business2.name : 'Tie';
       const moreReviews = business1.review_count > business2.review_count ? business1.name : 
-                         business2.review_count > business1.review_count ? business2.name : 'Tie';
+                          business2.review_count > business1.review_count ? business2.name : 'Tie';
       const lowerPrice = business1.avg_price < business2.avg_price ? business1.name : 
-                        business2.avg_price < business1.avg_price ? business2.name : 'Tie';
+                         business2.avg_price < business1.avg_price ? business2.name : 'Tie';
       
       doc.text(`• Higher Rating: ${higherRating}`, margin + 5, yPos);
       yPos += 6;
@@ -264,22 +232,19 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
       yPos += 6;
       doc.text(`• Lower Price: ${lowerPrice}`, margin + 5, yPos);
       
-      // Filename
       const fileName = `comparison_${business1.name}_vs_${business2.name}.pdf`
         .replace(/[^a-z0-9_-]/gi, '_')
         .toLowerCase();
       
-      // Save the PDF
       doc.save(fileName);
-      
       console.log('PDF exported successfully:', fileName);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating PDF:', error);
       alert(`Failed to export PDF: ${error.message || 'Unknown error'}. Check the console for details.`);
     }
   };
 
-  // Fixed 8 categories as specified
+  // Fixed indexing catalog standardizing standard query categories across business lists
   const categories: Category[] = [
     'Food',
     'Retail',
@@ -291,7 +256,7 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
     'Other'
   ];
 
-  // 9 districts
+  // Map coordinate region indices grouping available business addresses
   const districts = [
     'Downtown',
     'North',
@@ -304,6 +269,7 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
     'Southwest'
   ];
 
+  // Toggling selection modifier monitoring active catalog filters
   const handleCategoryToggle = (category: string) => {
     setSelectedCategories(prev =>
       prev.includes(category)
@@ -312,6 +278,7 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
     );
   };
 
+  // Regional location filter updater monitoring map parameters
   const handleDistrictToggle = (district: string) => {
     setSelectedDistricts(prev =>
       prev.includes(district)
@@ -320,6 +287,7 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
     );
   };
 
+  // Pricing matrix tier selection updater managing search cost ranges
   const handlePriceRangeToggle = (range: PriceRange) => {
     setSelectedPriceRanges(prev =>
       prev.includes(range)
@@ -328,21 +296,18 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
     );
   };
 
-  // Filter and sort businesses
+  // Computed data selector analyzing and updating collection matching across client selections
   const filteredAndSortedBusinesses = useMemo(() => {
     let result = [...businesses];
 
-    // Filter by categories
     if (selectedCategories.length > 0) {
       result = result.filter(b => selectedCategories.includes(b.category));
     }
 
-    // Filter by minimum rating
     if (minRating > 0) {
       result = result.filter(b => b.rating >= minRating);
     }
 
-    // Filter by price ranges
     if (selectedPriceRanges.length > 0) {
       result = result.filter(b => {
         const price = b.avg_price;
@@ -363,7 +328,6 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
       });
     }
 
-    // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(b => 
@@ -374,12 +338,10 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
       );
     }
 
-    // Filter by districts
     if (selectedDistricts.length > 0) {
       result = result.filter(b => selectedDistricts.includes(b.district));
     }
 
-    // Sort
     result.sort((a, b) => {
       switch (sortBy) {
         case 'rating':
@@ -387,7 +349,6 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
         case 'reviews':
           return b.review_count - a.review_count;
         case 'deals':
-          // Businesses with deals first, then by rating
           if (a.has_deal && !b.has_deal) return -1;
           if (!a.has_deal && b.has_deal) return 1;
           return b.rating - a.rating;
@@ -399,10 +360,23 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
     return result;
   }, [businesses, selectedCategories, sortBy, minRating, selectedPriceRanges, searchQuery, selectedDistricts]);
 
+  // Combined data structure feeding metric comparisons into Recharts components
+  const chartData = useMemo(() => {
+    const b1 = businesses.find(b => b.id === comparisonBusiness1);
+    const b2 = businesses.find(b => b.id === comparisonBusiness2);
+    if (!b1 || !b2) return [];
+
+    return [
+      { name: 'Rating', [b1.name]: b1.rating, [b2.name]: b2.rating },
+      { name: 'Reviews', [b1.name]: b1.review_count, [b2.name]: b2.review_count },
+      { name: 'Avg Price', [b1.name]: b1.avg_price, [b2.name]: b2.avg_price }
+    ];
+  }, [businesses, comparisonBusiness1, comparisonBusiness2]);
+
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        {/* Header */}
+        {/* Header content section tracking title elements */}
         <div className="mb-6 flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold text-foreground mb-2">Discover Local Businesses</h1>
@@ -411,7 +385,6 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
             </p>
           </div>
           
-          {/* Compare Button */}
           <button
             onClick={() => setShowComparison(true)}
             className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
@@ -422,11 +395,9 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
           </button>
         </div>
 
-        {/* Sidebar Layout */}
         <div className="flex gap-6">
-          {/* Left Sidebar - Filters */}
+          {/* Layout structural sidebar capturing filtration triggers */}
           <aside className="w-64 flex-shrink-0">
-            {/* Search Bar - Above filter box */}
             <div className="bg-card rounded-lg border border-border p-3 mb-3">
               <label htmlFor="search-input" className="block mb-1.5 text-[9px] font-semibold text-foreground">
                 Search Businesses
@@ -448,17 +419,13 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                     className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Clear search"
                   >
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             </div>
             
-            {/* Filter Box */}
             <div className="bg-card rounded-lg border border-border sticky top-6 p-3 space-y-2.5">
-              {/* View Mode Toggle */}
               <div>
                 <label className="block mb-1 text-[9px] font-semibold text-foreground">
                   View Mode
@@ -467,33 +434,24 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                   <button
                     onClick={() => setViewMode('map')}
                     className={`flex-1 px-2 py-1 rounded-md flex items-center justify-center gap-1 transition-colors ${
-                      viewMode === 'map'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
+                      viewMode === 'map' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
                     }`}
-                    aria-label="Switch to map view"
-                    aria-pressed={viewMode === 'map'}
                   >
-                    <Map className="w-3 h-3" aria-hidden="true" />
+                    <Map className="w-3 h-3" />
                     <span className="text-[9px]">Map</span>
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
                     className={`flex-1 px-2 py-1 rounded-md flex items-center justify-center gap-1 transition-colors ${
-                      viewMode === 'list'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
+                      viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
                     }`}
-                    aria-label="Switch to list view"
-                    aria-pressed={viewMode === 'list'}
                   >
-                    <List className="w-3 h-3" aria-hidden="true" />
+                    <List className="w-3 h-3" />
                     <span className="text-[9px]">List</span>
                   </button>
                 </div>
               </div>
 
-              {/* Category Filter */}
               <div>
                 <label className="block mb-1 text-[9px] font-semibold text-foreground">
                   Category
@@ -504,20 +462,15 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                       key={category}
                       onClick={() => handleCategoryToggle(category)}
                       className={`px-2 py-1 rounded-md flex items-center justify-center transition-colors ${
-                        selectedCategories.includes(category)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
+                        selectedCategories.includes(category) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
                       }`}
-                      aria-label={`Filter by ${category}`}
-                      aria-pressed={selectedCategories.includes(category)}
                     >
-                      <span className="text-[9px] font-medium text-center leading-tight">{category}</span>
+                      <span className="text-[9px] font-medium">{category}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* District Filter */}
               <div>
                 <label className="block mb-1 text-[9px] font-semibold text-foreground">
                   District
@@ -528,68 +481,35 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                       key={district}
                       onClick={() => handleDistrictToggle(district)}
                       className={`px-1 py-1 rounded-md flex items-center justify-center transition-colors ${
-                        selectedDistricts.includes(district)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
+                        selectedDistricts.includes(district) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
                       }`}
-                      aria-label={`Filter by district ${district}`}
-                      aria-pressed={selectedDistricts.includes(district)}
                     >
-                      <span className="text-[8px] font-medium text-center leading-tight">{district}</span>
+                      <span className="text-[8px] font-medium">{district}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Sort Options */}
               <div>
                 <label className="block mb-1 text-[9px] font-semibold text-foreground">
                   Sort By
                 </label>
                 <div className="space-y-1">
-                  <button
-                    onClick={() => setSortBy('rating')}
-                    className={`w-full px-2 py-1 rounded-md flex items-center gap-1.5 transition-colors ${
-                      sortBy === 'rating'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
-                    }`}
-                    aria-label="Sort by rating"
-                    aria-pressed={sortBy === 'rating'}
-                  >
-                    <ArrowUpDown className="w-2.5 h-2.5" aria-hidden="true" />
-                    <span className="text-[9px]">Highest Rated</span>
-                  </button>
-                  <button
-                    onClick={() => setSortBy('reviews')}
-                    className={`w-full px-2 py-1 rounded-md flex items-center gap-1.5 transition-colors ${
-                      sortBy === 'reviews'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
-                    }`}
-                    aria-label="Sort by number of reviews"
-                    aria-pressed={sortBy === 'reviews'}
-                  >
-                    <ArrowUpDown className="w-2.5 h-2.5" aria-hidden="true" />
-                    <span className="text-[9px]">Most Reviewed</span>
-                  </button>
-                  <button
-                    onClick={() => setSortBy('deals')}
-                    className={`w-full px-2 py-1 rounded-md flex items-center gap-1.5 transition-colors ${
-                      sortBy === 'deals'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
-                    }`}
-                    aria-label="Sort by deals"
-                    aria-pressed={sortBy === 'deals'}
-                  >
-                    <ArrowUpDown className="w-2.5 h-2.5" aria-hidden="true" />
-                    <span className="text-[9px]">Deals</span>
-                  </button>
+                  {(['rating', 'reviews', 'deals'] as SortOption[]).map((option) => (
+                    <button
+                      key={option}
+                      onClick={() => setSortBy(option)}
+                      className={`w-full px-2 py-1 rounded-md flex items-center gap-1.5 transition-colors ${
+                        sortBy === option ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
+                      }`}
+                    >
+                      <ArrowUpDown className="w-2.5 h-2.5" />
+                      <span className="text-[9px] capitalize">{option}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Minimum Rating Filter */}
               <div>
                 <label htmlFor="rating-slider" className="block mb-1 text-[9px] font-semibold text-foreground">
                   Min Rating: {minRating > 0 ? `${minRating}★` : 'Any'}
@@ -603,19 +523,9 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                   value={minRating}
                   onChange={(e) => setMinRating(parseFloat(e.target.value))}
                   className="w-full h-1.5 bg-secondary rounded-lg appearance-none cursor-pointer accent-primary"
-                  aria-label="Filter by minimum rating"
                 />
-                <div className="flex justify-between text-[8px] text-muted-foreground mt-0.5">
-                  <span>0</span>
-                  <span>1</span>
-                  <span>2</span>
-                  <span>3</span>
-                  <span>4</span>
-                  <span>5</span>
-                </div>
               </div>
 
-              {/* Price Range Filter */}
               <div>
                 <label className="block mb-1 text-[9px] font-semibold text-foreground">
                   Price Range
@@ -626,12 +536,8 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                       key={range}
                       onClick={() => handlePriceRangeToggle(range)}
                       className={`px-2 py-1 rounded-md flex items-center justify-center transition-colors ${
-                        selectedPriceRanges.includes(range)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground'
+                        selectedPriceRanges.includes(range) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
                       }`}
-                      aria-label={`Filter by price range ${range}`}
-                      aria-pressed={selectedPriceRanges.includes(range)}
                     >
                       <span className="text-xs font-bold">{range}</span>
                     </button>
@@ -639,7 +545,6 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                 </div>
               </div>
 
-              {/* Reset Button */}
               <button
                 onClick={() => {
                   setSelectedCategories([]);
@@ -647,30 +552,20 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                   setSortBy('default');
                   setMinRating(0);
                   setSelectedPriceRanges([]);
+                  setSearchQuery('');
                 }}
-                className="w-full px-2 py-1.5 bg-secondary text-secondary-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-[9px] font-medium"
-                aria-label="Reset all filters"
+                className="w-full px-2 py-1.5 bg-secondary text-secondary-foreground rounded-md hover:bg-accent transition-colors text-[9px] font-medium"
               >
                 Reset Filters
               </button>
             </div>
           </aside>
 
-          {/* Right Content - Business List/Map */}
+          {/* Primary data container staging grid cards or interactive maps */}
           <main className="flex-1 min-w-0">
             {viewMode === 'map' ? (
               <div className="space-y-4">
-                <MapView
-                  businesses={filteredAndSortedBusinesses}
-                  onBusinessClick={onBusinessClick}
-                />
-                <div className="bg-accent/10 p-4 rounded-lg border border-accent/20">
-                  <p className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">Map View:</strong> The map provides spatial 
-                    context for discovery. Users can see business density and proximity. 
-                    Click any pin to view business details.
-                  </p>
-                </div>
+                <MapView businesses={filteredAndSortedBusinesses} onBusinessClick={onBusinessClick} />
               </div>
             ) : (
               <>
@@ -686,21 +581,7 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                   </div>
                 ) : (
                   <div className="text-center py-16 bg-card rounded-lg border border-border">
-                    <p className="text-muted-foreground text-lg mb-4">
-                      No businesses found matching your filters
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSelectedCategories([]);
-                        setSortBy('default');
-                        setMinRating(0);
-                        setSelectedPriceRanges([]);
-                      }}
-                      className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
-                      aria-label="Reset all filters"
-                    >
-                      Reset Filters
-                    </button>
+                    <p className="text-muted-foreground text-lg mb-4">No businesses found matching your filters</p>
                   </div>
                 )}
               </>
@@ -709,54 +590,46 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
         </div>
       </div>
 
-      {/* Contextual Help */}
       <ContextualHelp
         title="Browse Help"
         items={[
           'Toggle between Map View and List View using the view mode buttons',
           'Use filters to narrow down businesses by category, district, rating, and price range',
-          'Search for businesses by name, category, or district in the search bar',
-          'Sort businesses by highest rated, most reviewed, or deals available',
-          'On the map, green pins indicate businesses with active deals, blue pins are standard businesses',
-          'Click any business card or map pin to view full details and reviews'
+          'Search for businesses by name, category, or district in the search bar'
         ]}
       />
 
-      {/* Comparison Modal */}
+      {/* Analytics overlay module analyzing multi-entity resource summaries */}
       {showComparison && (
         <div
           className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
           onClick={() => setShowComparison(false)}
           role="dialog"
           aria-modal="true"
-          aria-labelledby="comparison-title"
         >
           <div
             className="bg-background rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-0 bg-background border-b border-border px-6 py-4 flex items-center justify-between z-10">
               <div>
-                <h2 id="comparison-title" className="text-2xl font-bold text-foreground">
-                  Compare Businesses
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Select two businesses to see a detailed comparison
-                </p>
+                <h2 className="text-2xl font-bold text-foreground">Compare Businesses</h2>
               </div>
-              <button
-                onClick={() => setShowComparison(false)}
-                className="p-2 hover:bg-accent rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
-                aria-label="Close comparison"
-              >
-                <X className="w-6 h-6" aria-hidden="true" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleExportPDF}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-secondary text-secondary-foreground text-sm rounded-lg hover:bg-accent transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Export PDF
+                </button>
+                <button onClick={() => setShowComparison(false)} className="p-2 hover:bg-accent rounded-lg">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
-            {/* Modal Content */}
             <div className="px-6 py-6 space-y-6" ref={comparisonRef}>
-              {/* Business Selection */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="business1-select" className="block text-sm font-medium text-foreground mb-2">
@@ -769,14 +642,11 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                     className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Select a business...</option>
-                    {filteredAndSortedBusinesses.map((business) => (
-                      <option key={business.id} value={business.id} disabled={business.id === comparisonBusiness2}>
-                        {business.name}
-                      </option>
+                    {businesses.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
                     ))}
                   </select>
                 </div>
-
                 <div>
                   <label htmlFor="business2-select" className="block text-sm font-medium text-foreground mb-2">
                     Business 2
@@ -788,7 +658,45 @@ export function BrowsePage({ businesses, onBusinessClick }: BrowsePageProps) {
                     className="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   >
                     <option value="">Select a business...</option>
-                    {filteredAndSortedBusinesses.map((business) => (
+                    {businesses.map(b => (
+                      <option key={b.id} value={b.id}>{b.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Data visualization element displaying multi-variant analytical metrics */}
+              {chartData.length > 0 && (
+                <div className="h-80 w-full bg-card p-4 rounded-xl border border-border">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="name" />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar dataKey={businesses.find(b => b.id === comparisonBusiness1)?.name || 'Business 1'} fill="#16a34a" />
+                      <Bar dataKey={businesses.find(b => b.id === comparisonBusiness2)?.name || 'Business 2'} fill="#3b82f6" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Operational validation popup prompting explicit parameter entry for comparative summaries */}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-card p-6 rounded-lg max-w-sm w-full border border-border text-center space-y-4">
+            <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
+            <h3 className="text-lg font-bold text-foreground">Selection Required</h3>
+            <p className="text-sm text-muted-foreground">Please select two separate targets to output accurate report data tables.</p>
+            <button onClick={() => setShowExportModal(false)} className="px-4 py-2 bg-primary text-primary-foreground rounded-md w-full">
+              Acknowledge
+            </button>
+      SortedBusinesses.map((business) => (
                       <option key={business.id} value={business.id} disabled={business.id === comparisonBusiness1}>
                         {business.name}
                       </option>
