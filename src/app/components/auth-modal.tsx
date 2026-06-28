@@ -11,6 +11,7 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
+  // Configuration states tracking current authentication step parameters
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +22,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  // Real-time validation
+  // Real-time validation handler confirming explicit formatting for text address configurations
   const validateEmail = (email: string): string => {
     if (!email.trim()) {
       return 'Email is required';
@@ -33,6 +34,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     return '';
   };
 
+  // Integrity checker ensuring password arguments match application policy guidelines
   const validatePassword = (password: string): string => {
     if (!password) {
       return 'Password is required';
@@ -43,7 +45,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     if (password.length > 128) {
       return 'Password must be less than 128 characters';
     }
-    // Check for at least one letter and one number for stronger password
+    // Conditional rule logic validating sign-up string properties match complexity requirements
     if (mode === 'signup') {
       if (!/[a-zA-Z]/.test(password)) {
         return 'Password must contain at least one letter';
@@ -55,6 +57,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     return '';
   };
 
+  // Boundary logic evaluating character sets and field length scopes for human identifiers
   const validateName = (name: string): string => {
     if (!name.trim()) {
       return 'Name is required';
@@ -65,13 +68,14 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     if (name.trim().length > 50) {
       return 'Name must be less than 50 characters';
     }
-    // Only allow letters, spaces, hyphens, and apostrophes
+    // Character white-list pattern restricting text arguments to natural name formats
     if (!/^[a-zA-Z\s\-']+$/.test(name)) {
       return 'Name can only contain letters, spaces, hyphens, and apostrophes';
     }
     return '';
   };
 
+  // Blur focus capture mechanism checking specific node updates on interaction lose
   const handleBlur = (field: string) => {
     setTouched(prev => ({ ...prev, [field]: true }));
     
@@ -87,6 +91,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     setFieldErrors(prev => ({ ...prev, [field]: errorMsg }));
   };
 
+  // Mutator setting raw text attributes tracking field edits for active email targets
   const handleEmailChange = (value: string) => {
     setEmail(value);
     if (touched.email) {
@@ -94,6 +99,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     }
   };
 
+  // State sync wrapper ensuring user password targets are kept contextually clean
   const handlePasswordChange = (value: string) => {
     setPassword(value);
     if (touched.password) {
@@ -101,6 +107,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     }
   };
 
+  // Input listener logging updates on human name fields when tracking changes
   const handleNameChange = (value: string) => {
     setName(value);
     if (touched.name) {
@@ -108,18 +115,19 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     }
   };
 
+  // Structural submittal engine dispatching operations back to remote storage endpoints
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     
-    // Mark all fields as touched
+    // Explicit tracking array mapping all target inputs to touched states
     const allTouched: Record<string, boolean> = { email: true, password: true };
     if (mode === 'signup') {
       allTouched.name = true;
     }
     setTouched(allTouched);
     
-    // Validate all fields
+    // Comprehensive runtime schema assessment scoring all fields before communication stages
     const errors: Record<string, string> = {
       email: validateEmail(email),
       password: validatePassword(password)
@@ -129,7 +137,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
       errors.name = validateName(name);
     }
 
-    // SQL injection checks on free-text fields
+    // Defensive validation interception verifying characters are clear of potential query attacks
     const emailInjection = sqlInjectionError(email);
     if (emailInjection) errors.email = emailInjection;
     if (mode === 'signup') {
@@ -139,13 +147,13 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
 
     setFieldErrors(errors);
 
-    // Check if there are any errors
+    // Conditional processing halt checking if error structures are holding active alerts
     const hasErrors = Object.values(errors).some(err => err !== '');
     if (hasErrors) {
       return;
     }
     
-    // Bot verification check
+    // Safety checkpoint checking if anti-automation mechanisms have validated transaction context
     if (!verified) {
       setError('Please verify that you are not a robot');
       return;
@@ -156,6 +164,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
     try {
       let user: User;
       
+      // Dispatch route logic switching queries between resource creation and session assignment
       if (mode === 'signup') {
         if (!name.trim()) {
           setError('Please enter your name');
@@ -176,9 +185,11 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
   };
 
   return (
+    // Backdrop layout element pinning overlay windows centered across structural views
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      {/* Structural layout card setting modal container limits */}
       <div className="bg-white rounded-lg max-w-md w-full p-6 relative">
-        {/* Close button */}
+        {/* Absolute trigger target removing overlay card state contexts */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
@@ -187,20 +198,21 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           <X className="w-5 h-5" />
         </button>
 
-        {/* Title */}
+        {/* Informational display heading alerting user to current system operation step */}
         <h2 className="text-2xl font-bold text-gray-900 mb-6">
           {mode === 'signin' ? 'Sign In' : 'Create Account'}
         </h2>
 
-        {/* Error message */}
+        {/* Global form summary warning container alerting users to unexpected failures */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
             {error}
           </div>
         )}
 
-        {/* Form */}
+        {/* Main transaction ingestion form framing inputs together */}
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Conditional sub-form container capturing human context profiles during registration */}
           {mode === 'signup' && (
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -222,6 +234,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
             </div>
           )}
 
+          {/* Core field block handling data tracking targets for network identifications */}
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -241,6 +254,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
             )}
           </div>
 
+          {/* Secure field block managing entry for credential keys */}
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
@@ -264,8 +278,10 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
             )}
           </div>
 
+          {/* Injected anti-bot captcha component parsing verification flags back to local tracking elements */}
           <TextCaptcha onVerify={setVerified} />
 
+          {/* Network request ignition switch running authorization checks */}
           <button
             type="submit"
             disabled={loading}
@@ -275,7 +291,7 @@ export function AuthModal({ onClose, onSuccess }: AuthModalProps) {
           </button>
         </form>
 
-        {/* Toggle mode */}
+        {/* View switching panel routing navigation contexts across authentication targets */}
         <div className="mt-4 text-center text-sm text-gray-600">
           {mode === 'signin' ? (
             <>
