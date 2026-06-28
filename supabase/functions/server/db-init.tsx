@@ -2,7 +2,7 @@
 import { supabase } from './supabase-client.tsx';
 
 export async function initializeDatabaseTables() {
-  console.log('🔧 Checking database tables...');
+  console.log(' Checking database tables...');
 
   try {
     // Create tables using raw SQL
