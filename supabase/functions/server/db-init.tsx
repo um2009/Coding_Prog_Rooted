@@ -1,11 +1,11 @@
-// Database initialization - creates tables if they don't exist
+// Database initialization - ccreate tables
 import { supabase } from './supabase-client.tsx';
 
 export async function initializeDatabaseTables() {
   console.log(' Checking database tables...');
 
   try {
-    // Create tables using raw SQL
+    // Create tables using  SQL
     const createTablesSQL = `
       -- Users table
       CREATE TABLE IF NOT EXISTS users (
@@ -80,13 +80,13 @@ export async function initializeDatabaseTables() {
     const { error } = await supabase.rpc('exec_sql', { sql: createTablesSQL });
     
     if (error) {
-      // If RPC doesn't exist, try direct table creation
-      console.log('⚠️ Could not use RPC, tables may need manual creation');
+      // If doesn't exist, try direct table creation
+      console.log(' Could not use RPC, tables may need manual creation');
       console.log('Please run DATABASE_SCHEMA.sql in Supabase SQL Editor');
       return false;
     }
 
-    console.log('✅ Database tables verified/created');
+    console.log(' Database tables verified/created');
     return true;
 
   } catch (error) {
@@ -106,14 +106,14 @@ export async function checkTablesExist(): Promise<boolean> {
     const { error: dealsError } = await supabase.from('deals').select('id').limit(1);
 
     if (usersError || businessesError || reviewsError || bookmarksError || dealsError) {
-      console.log('❌ One or more tables do not exist');
+      console.log('One or more tables do not exist');
       return false;
     }
 
-    console.log('✅ All tables exist');
+    console.log(' All tables exist');
     return true;
   } catch (error) {
-    console.error('❌ Error checking tables:', error);
+    console.error(Error checking tables:', error);
     return false;
   }
 }
